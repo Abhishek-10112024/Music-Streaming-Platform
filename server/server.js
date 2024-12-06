@@ -5,6 +5,7 @@ import User from './models/User.js';
 import Song from './models/Song.js';
 import Playlist from './models/Playlist.js';
 import Report from './models/Report.js';
+import authRoute from "./routes/authRoute.js";
 
 configDotenv();
 
@@ -31,7 +32,9 @@ const app = express();
 
 app.use(express.json());
 
-const port = process.env.PORT || 3000
+app.use('/api/auth', authRoute);
+
+const port = process.env.PORT || 5000
 
 
 sequelize.sync({ force: false }) 
