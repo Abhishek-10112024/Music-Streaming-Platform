@@ -18,23 +18,21 @@
                   body: JSON.stringify({ name, email, password })
               });
   
-                const data = await response.json();
-                        if (response.ok) {
-                            successMessage = data.message;
-                            errorMessage = '';
-                        } else {
-                            successMessage = '';
-                            errorMessage = data.message;
-                        }
+              const data = await response.json();
+                      if (response.ok) {
+                          successMessage = data.message;
+                      } else {
+                          errorMessage = data.message;
+                      }
           } catch (error) {
               console.error('Error during signup:', error);
               errorMessage = 'An unexpected error occurred';
           }
       };
   
-      const handleLogin = () => {
-          navigate('/');
-      };
+    const handleLogin = () => {
+        navigate('/');
+    };
   </script>
 
 <section class="vh-100" style="background-color: #9A616D;">
@@ -53,8 +51,8 @@
                   <form>
   
                     <div class="d-flex align-items-center mb-3 pb-1">
-                      <img src="https://cdn-icons-png.flaticon.com/512/3820/3820321.png" alt="Spotify Logo" class="me-3" style="width: 40px; height: 40px;">
-                      <span class="h1 fw-bold mb-0">Musically</span>
+                      <img src="https://cdn-icons-png.flaticon.com/512/3820/3820321.png" alt="Logo" class="me-3" style="width: 40px; height: 40px;">
+                      <span class="h1 fw-bold mb-0">SoulPlay</span>
                     </div> 
   
                     <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">SignUp to create an account</h5>
