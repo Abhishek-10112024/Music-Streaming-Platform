@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { configDotenv } from "dotenv";
 import sequelize from "./db.js";
 import User from './models/User.js';
@@ -31,6 +32,10 @@ User.hasMany(Report, { foreignKey: 'reportedBy' });
 const app = express();
 
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
 
 app.use('/api/auth', authRoute);
 
