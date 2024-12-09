@@ -53,9 +53,9 @@ const handleSignUp = () => {
                 <form>
 
                   <div class="d-flex align-items-center mb-3 pb-1">
-                    <i class="fas fa-cubes fa-2x me-3" style="color: #ff6219;"></i>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3820/3820321.png" alt="Spotify Logo" class="me-3" style="width: 40px; height: 40px;">
                     <span class="h1 fw-bold mb-0">Musically</span>
-                  </div>
+                  </div>                  
 
                   <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Login into your account</h5>
 
@@ -84,13 +84,3 @@ const handleSignUp = () => {
     </div>
   </div>
 </section>
-
-<style>
-form {
-  font-weight: bold;
-}
-
-.card-body{
-  line-height: 0px;
-}
-</style>
