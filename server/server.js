@@ -6,7 +6,9 @@ import User from './models/User.js';
 import Song from './models/Song.js';
 import Playlist from './models/Playlist.js';
 import Report from './models/Report.js';
-import authRoute from "./routes/authRoute.js";
+import authRoutes from "./routes/authRoutes.js";
+import playlistRoutes from "./routes/playlistRoutes.js";
+import songRoutes from "./routes/songRoutes.js"
 
 configDotenv();
 
@@ -37,12 +39,14 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use('/api/auth', authRoute);
+app.use('/api/auth', authRoutes);
+app.use('/api/songs', songRoutes);
+app.use('/api/playlists', playlistRoutes);
 
 const port = process.env.PORT || 5000
 
 
-sequelize.sync({ force: false }) 
+sequelize.sync({ alter: false }) 
     .then(() => { 
         console.log('Database synchronized successfully.');
         app.listen(port, () => { 
