@@ -2,6 +2,20 @@ import Playlist from '../models/Playlist.js';
 import Song from '../models/Song.js';
 import PlaylistSong from '../models/PlaylistSong.js';
 
+
+// create a new playlist
+// add song to playlist
+// remove song from playlist
+// delete playlist
+// search a song by title, artist, album or genre
+
+
+// create a liked playlist (by default)
+// add song to liked
+// remove song from liked
+// search a song by title, artist, album or genre
+
+
 // Create a new playlist
 export const createPlaylist = async (req, res) => {
     try {

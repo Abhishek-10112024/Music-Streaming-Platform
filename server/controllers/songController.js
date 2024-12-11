@@ -2,6 +2,24 @@ import Song from '../models/Song.js';
 import fs from 'fs';
 import multer from 'multer';
 
+// anyone can upload a song (user or admin) using multer
+
+// stream a song
+// play, pause, next, previous song
+
+// create a reported songs list
+// report a song as offensive with reason and add it to reported songs list
+// get the list of reported songs and accept or reject them as offensive (admin access)
+
+// delete any song (admin access)
+// delete his own uploaded songs (logged in user only)
+
+// get list of all the non-deleted and non-reported songs
+// get list of non-deleted and non-reported songs uploaded by logged in user
+// get list of non-deleted and non-reported songs uploaded by a user using user ID (admin access)
+// search a song by title, artist, album or genre
+
+
 // Setup storage with disk storage for Multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
