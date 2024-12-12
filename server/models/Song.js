@@ -20,9 +20,9 @@ const Song = sequelize.define('Song', {
   genre: {
     type: DataTypes.STRING,
   },
-  mp3_data: {
-    type: DataTypes.BLOB, // Use BLOB to store binary data (MP3 file)
-    allowNull: false, // Ensure the file is provided
+  mp3_file_path: {
+    type: DataTypes.STRING, // Store the path to the MP3 file
+    allowNull: false, 
   },
   isRestricted: {
     type: DataTypes.BOOLEAN,

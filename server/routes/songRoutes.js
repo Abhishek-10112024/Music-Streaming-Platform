@@ -1,12 +1,35 @@
 import express from 'express';
-import { addSong, saveSong, getAllSongs, reportSong, likeSong } from '../controllers/songController.js';
+import { uploadSong, streamSong, reportSong, getReportedSongs, resolveReport, deleteSong, getAllSongs, getUserSongs, searchSongs } from '../controllers/songController.js';
 import { userAuthentication } from '../middlewares/authMiddleware.js';
+import { upload } from '../controllers/songController.js';
 
 const router = express.Router();
 
-router.post('/upload', userAuthentication, addSong, saveSong);   // Upload song route
-router.get('/songs', userAuthentication, getAllSongs);            // Fetch all songs
-router.post('/report',userAuthentication, reportSong);           // Report a song
-router.post('/like',userAuthentication, likeSong);               // Like a song
+// Upload a new song
+router.post('/', userAuthentication, upload.single('song'), uploadSong);
+
+// Stream a song
+router.get('/stream/:songId', userAuthentication, streamSong);
+
+// Report a song
+router.post('/report', userAuthentication, reportSong);
+
+// Get a list of all reported songs (admin only)
+router.get('/reports', userAuthentication, getReportedSongs);
+
+// Resolve a song report (admin only)
+router.post('/reports/resolve', userAuthentication, resolveReport);
+
+// Delete a song (admin only)
+router.delete('/:songId', userAuthentication, deleteSong);
+
+// Get a list of all non-deleted and non-reported songs
+router.get('/', userAuthentication, getAllSongs);
+
+// Get a list of non-deleted, non-reported songs uploaded by the logged-in user
+router.get('/my-songs', userAuthentication, getUserSongs);
+
+// Search for songs by title, artist, album, or genre
+router.get('/search', userAuthentication, searchSongs);
 
 export default router;

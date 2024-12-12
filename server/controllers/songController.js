@@ -1,121 +1,224 @@
 import Song from '../models/Song.js';
-import fs from 'fs';
+import Report from '../models/Report.js';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
-// anyone can upload a song (user or admin) using multer
-
-// stream a song
-// play, pause, next, previous song
-
-// create a reported songs list
-// report a song as offensive with reason and add it to reported songs list
-// get the list of reported songs and accept or reject them as offensive (admin access)
-
-// delete any song (admin access)
-// delete his own uploaded songs (logged in user only)
-
-// get list of all the non-deleted and non-reported songs
-// get list of non-deleted and non-reported songs uploaded by logged in user
-// get list of non-deleted and non-reported songs uploaded by a user using user ID (admin access)
-// search a song by title, artist, album or genre
-
-
-// Setup storage with disk storage for Multer
+// Set up multer for song upload
+// Multer Storage Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Folder where the files will be stored
+      const uploadPath = 'uploads/songs';
+      
+      // Create the directory if it doesn't exist
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      
+      cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
-});
-
-const upload = multer({ storage: storage });
-
-// Add a new song
-export const addSong = upload.single('mp3_file'); // Multer upload middleware
-
-export const saveSong = async (req, res) => {
-    try {
-        const { title, artist, album, duration, genre, isRestricted } = req.body;
-        const mp3File = fs.readFileSync(req.file.path);  // Reading the file data
-
-        const newSong = await Song.create({
-            title,
-            artist,
-            album,
-            duration,
-            genre,
-            mp3_data: mp3File, // Saving the binary MP3 data to the database
-            isRestricted: isRestricted || false,
-        });
-
-        res.status(201).json({ message: 'Song uploaded successfully', song: newSong });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error saving song' });
+      cb(null, Date.now() + path.extname(file.originalname)); // Use timestamp to make filename unique
     }
-};
-
-// Get all songs
-export const getAllSongs = async (req, res) => {
+  });
+  
+export const upload = multer({ storage });
+  
+  // Refactor using async/await for better readability
+  export const uploadSong = async (req, res) => {
     try {
-        const songs = await Song.findAll({
-            where: { deleted: false },  // Ensure only non-deleted songs are fetched
-        });
-        res.status(200).json(songs);
+      const { title, artist, album, genre, duration } = req.body;
+      const file = req.file; // Multer attaches the file to `req.file`
+  
+      if (!file) {
+        return res.status(400).json({ message: 'No song file uploaded.' });
+      }
+  
+      // Check if the song already exists in the database
+      const existingSong = await Song.findOne({ where: { title, artist, album, deleted: false } });
+  
+      if (existingSong) {
+        return res.status(409).json({ message: 'This song already exists in the database.' });
+      }
+  
+      // Proceed with uploading the new song if not existing
+      const newSong = await Song.create({
+        title,
+        artist,
+        album,
+        genre,
+        duration,
+        mp3_file_path: file.path,
+        uploadedBy: req.user.id
+      });
+  
+      res.status(201).json({ message: 'Song uploaded successfully', song: newSong });
+  
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error fetching songs' });
+      console.error(error);
+      res.status(500).json({ message: 'Error uploading song', error: error.message });
     }
+  };
+
+// Stream a song (returning song data in chunks)
+export const streamSong = (req, res) => {
+    const { songId } = req.params;
+
+    Song.findByPk(songId)
+        .then(song => {
+            if (!song || song.deleted) return res.status(404).json({ message: 'Song not found.' });
+            // Get the path to the MP3 file and stream it
+            const songFilePath = song.mp3_file_path;
+
+            // Check if file exists
+            fs.exists(songFilePath, (exists) => {
+                if (!exists) return res.status(404).json({ message: 'File not found on server.' });
+
+                res.setHeader('Content-Type', 'audio/mpeg');
+                const stream = fs.createReadStream(songFilePath);
+                stream.pipe(res);
+            });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error streaming song', error: err });
+        });
 };
 
 // Report a song
-export const reportSong = async (req, res) => {
-    try {
-        const { songId, reason } = req.body;
-        const song = await Song.findByPk(songId);
+export const reportSong = (req, res) => {
+    const { songId, reason } = req.body;
 
-        if (!song) {
-            return res.status(404).json({ message: 'Song not found' });
-        }
+    Song.findByPk(songId)
+        .then(song => {
+            if (!song || song.deleted) return res.status(404).json({ message: 'Song not found.' });
 
-        const report = await Report.create({
-            songId,
-            reason,
-            status: 'pending',
+            const report = new Report({
+                reason,
+                songId: song.id,
+                reportedBy: req.user.id,
+            });
+
+            report.save()
+                .then(() => {
+                    song.addReport(report);
+                    res.status(201).json({ message: 'Song reported successfully' });
+                })
+                .catch(err => {
+                    res.status(500).json({ message: 'Error reporting song', error: err });
+                });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error reporting song', error: err });
         });
-
-        song.isRestricted = true;  // Mark the song as restricted until reviewed
-        await song.save();
-
-        res.status(200).json({ message: 'Song reported and restricted', report });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error reporting song' });
-    }
 };
 
-// Like a song
-export const likeSong = async (req, res) => {
-    try {
-        const { songId, userId } = req.body;
-        const song = await Song.findByPk(songId);
-        const user = await User.findByPk(userId);
+// Get list of reported songs (admin only)
+export const getReportedSongs = (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
-        if (!song || !user) {
-            return res.status(404).json({ message: 'Song or User not found' });
-        }
+    Report.findAll({ include: Song })
+        .then(reports => {
+            res.status(200).json({ reports });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error retrieving reports', error: err });
+        });
+};
 
-        const existingLike = await Like.findOne({ where: { songId, userId } });
-        if (existingLike) {
-            return res.status(400).json({ message: 'You already liked this song' });
-        }
+// Accept or reject a report (admin only)
+export const resolveReport = (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
-        await Like.create({ songId, userId });
-        res.status(200).json({ message: 'Song liked successfully' });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error liking song' });
+    const { reportId, status } = req.body;
+
+    if (!['pending', 'rejected', 'accepted'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
     }
+
+    Report.findByPk(reportId)
+        .then(report => {
+            if (!report) return res.status(404).json({ message: 'Report not found' });
+
+            report.update({ status })
+                .then(updatedReport => {
+                    if (status === 'rejected') {
+                        report.song.addReport({ songId: report.song.id }); // Remove from reported songs if rejected
+                    }
+                    res.status(200).json({ message: `Report ${status} successfully`, report: updatedReport });
+                })
+                .catch(err => {
+                    res.status(500).json({ message: 'Error updating report', error: err });
+                });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error resolving report', error: err });
+        });
+};
+
+// Delete a song (admin only)
+export const deleteSong = (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    const { songId } = req.params;
+
+    Song.findByPk(songId)
+        .then(song => {
+            if (!song) return res.status(404).json({ message: 'Song not found' });
+
+            song.update({ deleted: true })
+                .then(() => {
+                    res.status(200).json({ message: 'Song deleted successfully' });
+                })
+                .catch(err => {
+                    res.status(500).json({ message: 'Error deleting song', error: err });
+                });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error deleting song', error: err });
+        });
+};
+
+// Get list of all non-deleted, non-reported songs
+export const getAllSongs = (req, res) => {
+    Song.findAll({ where: { deleted: false }, include: { model: Report, where: { status: 'pending' }, required: false } })
+        .then(songs => {
+            res.status(200).json({ songs });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error retrieving songs', error: err });
+        });
+};
+
+// Get list of non-deleted, non-reported songs uploaded by logged in user
+export const getUserSongs = (req, res) => {
+    Song.findAll({ where: { uploadedBy: req.user.id, deleted: false }, include: { model: Report, where: { status: 'pending' }, required: false } })
+        .then(songs => {
+            res.status(200).json({ songs });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error retrieving songs', error: err });
+        });
+};
+
+// Search songs by title, artist, album, or genre
+export const searchSongs = (req, res) => {
+    const { query } = req.query;
+
+    Song.findAll({
+        where: {
+            deleted: false,
+            [Op.or]: [
+                { title: { [Op.like]: `%${query}%` } },
+                { artist: { [Op.like]: `%${query}%` } },
+                { album: { [Op.like]: `%${query}%` } },
+                { genre: { [Op.like]: `%${query}%` } },
+            ],
+        },
+    })
+        .then(songs => {
+            res.status(200).json({ songs });
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Error searching songs', error: err });
+        });
 };
