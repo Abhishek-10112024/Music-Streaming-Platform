@@ -12,13 +12,13 @@ router.post('/', userAuthentication, upload.single('song'), uploadSong);
 router.get('/stream/:songId', userAuthentication, streamSong);
 
 // Report a song
-router.post('/report', userAuthentication, reportSong);
+router.post('/report/:songId', userAuthentication, reportSong);
 
 // Get a list of all reported songs (admin only)
 router.get('/reports', userAuthentication, getReportedSongs);
 
 // Resolve a song report (admin only)
-router.post('/reports/resolve', userAuthentication, resolveReport);
+router.post('/reports/resolve/:reportId', userAuthentication, resolveReport);
 
 // Delete a song (admin only)
 router.delete('/:songId', userAuthentication, deleteSong);

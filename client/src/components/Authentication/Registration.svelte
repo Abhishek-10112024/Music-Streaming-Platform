@@ -1,7 +1,7 @@
 <script>
     import { navigate } from 'svelte-routing';
   
-    let name = '';
+    let username = '';
     let email = '';
     let password = '';
     let errorMessage = '';
@@ -15,11 +15,12 @@
                   headers: {
                       'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ name, email, password })
+                  body: JSON.stringify({ username, email, password })
               });
   
               const data = await response.json();
                       if (response.ok) {
+                          alert('Signup successful! Welcome to the platform. Please log in to your account');
                           successMessage = data.message;
                       } else {
                           errorMessage = data.message;
@@ -58,7 +59,7 @@
                     <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">SignUp to create an account</h5>
 
                     <div data-mdb-input-init class="form-outline mb-4">
-                        <input type="email" id="form2Example17" class="form-control form-control-lg" placeholder="User Name" bind:value={name} required/>
+                        <input type="email" id="form2Example17" class="form-control form-control-lg" placeholder="User Name" bind:value={username} required/>
                     </div>
   
                     <div data-mdb-input-init class="form-outline mb-4">

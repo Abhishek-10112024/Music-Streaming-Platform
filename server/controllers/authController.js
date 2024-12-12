@@ -18,6 +18,14 @@ try {
         return res.status(400).json({ message: "Please enter all the required fields"});
     }
 
+    const { role: userRole } = req.body; // Extract role from request body
+    const { role: adminRole } = req.user || {}; // If req.user is undefined, default to an empty object
+    
+    // Check if userRole is 'admin' and adminRole is not 'admin'
+    if (userRole === 'admin' && adminRole !== 'admin') {
+        return res.status(403).json({ message: "Only admins can register new admin." });
+    }
+
     // constraints on email and password
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?]).{8,}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
