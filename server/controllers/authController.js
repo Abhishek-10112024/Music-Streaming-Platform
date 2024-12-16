@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { addToBlacklist } from "../middlewares/tokenBlacklist.js";
 import { configDotenv } from "dotenv";
+import Playlist from "../models/Playlist.js";
 
 configDotenv();
 
@@ -11,22 +12,18 @@ const secretKey = process.env.JWT_SECRET;
 // User registration
 export const register = async (req, res) => {
 try {
-    
-    // request body for new user registration
     const {username, email, password, role} = req.body;
     if (!username || !email || !password){
         return res.status(400).json({ message: "Please enter all the required fields"});
     }
 
-    const { role: userRole } = req.body; // Extract role from request body
-    const { role: adminRole } = req.user || {}; // If req.user is undefined, default to an empty object
+    const { role: userRole } = req.body; 
+    const { role: adminRole } = req.user || {}; 
     
-    // Check if userRole is 'admin' and adminRole is not 'admin'
     if (userRole === 'admin' && adminRole !== 'admin') {
         return res.status(403).json({ message: "Only admins can register new admin." });
     }
 
-    // constraints on email and password
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?]).{8,}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!passwordRegex.test(password)){
@@ -36,24 +33,27 @@ try {
         return res.status(400).json({ message: "Invalid email address. Please include @ and a valid domain" })
     }
 
-    // Checking for duplicate user
-    const userExists = await User.findOne({where: {email}});
+    const userExists = await User.findOne({where: { email, deleted: false }});
     if (userExists){
         return res.status(400).json({message: "User Already exists"});
     }
 
-    // hashing the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Creating new user
-    await User.create({
+    const user = await User.create({
         username,
         email,
         password: hashedPassword,
         role: role || 'user',
-    })
+    });
 
-    // After successful creation, send the success message
+    // Create a "Liked Songs" playlist for the user
+    await Playlist.create({
+        name: 'Liked Songs',
+        description: 'Songs that you liked',
+        createdBy: user.id,
+    });
+
     return res.status(201).json({message: "User created successfully"});
 } catch(error) {
     console.log(error);
@@ -65,28 +65,23 @@ try {
 // User login 
 export const login = async (req, res) =>{
     try{
-        // request body for login
         const {email, password} = req.body;
         if (!email || !password){
             return res.status(400).json({message: "Please provide all the required fields"})
         }
-    
-        // checkig for user
+
         const user = await User.findOne({where: {email}});
         if (!user){
             return res.status(401).json({message: "Invalid credentials"});
         }
     
-        // checking password
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch){
             return res.status(401).json({message: "Invalid credentials"});
         }
-    
-        // jwt access token generation
+
         const token = jwt.sign({id: user.id, username: user.username, email: user.email, role: user.role}, secretKey, {expiresIn: '1h'});
-    
-        // success meassage alongwith token and user role
+
         return res.status(200).json({message: "Login successfull", token, userRole: user.role});
 
     } catch(error){
