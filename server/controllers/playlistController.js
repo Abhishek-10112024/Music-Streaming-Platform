@@ -124,22 +124,20 @@ export const getPlaylistSongs = async (req, res) => {
 };
 
 
-// Get the list of liked songs
+// Get the list of liked songs from the "Liked Songs" playlist
 export const getLikedSongs = async (req, res) => {
     try {
         const playlist = await Playlist.findOne({
             where: { createdBy: req.user.id, name: 'Liked Songs', deleted: false },
-            include: [
-                {
-                    model: Song,
-                    where: { deleted: false },
-                    through: { attributes: [] },  // Exclude the junction table data
-                }
-            ],
+            include: {
+                model: Song,
+                where: { deleted: false }, 
+                through: { attributes: [] }, // Exclude the junction table data
+            },
         });
 
         if (!playlist) {
-            return res.status(404).json({ message: 'Liked Songs playlist not found' });
+            return res.status(404).json({ message: 'Liked Songs playlist not found for this user' });
         }
 
         res.status(200).json({ songs: playlist.Songs });
@@ -148,18 +146,21 @@ export const getLikedSongs = async (req, res) => {
     }
 };
 
-
-// Add song to liked list
+// Add song to the "Liked Songs" playlist
 export const addSongToLikedList = async (req, res) => {
     const { songId } = req.body;
 
     try {
-        const playlist = await Playlist.findOne({
+        let playlist = await Playlist.findOne({
             where: { createdBy: req.user.id, name: 'Liked Songs', deleted: false },
         });
 
         if (!playlist) {
-            return res.status(404).json({ message: 'Liked Songs playlist not found' });
+            playlist = await Playlist.create({
+                name: 'Liked Songs',
+                description: 'Songs that you liked',
+                createdBy: req.user.id,
+            });
         }
 
         const song = await Song.findByPk(songId);
@@ -175,8 +176,7 @@ export const addSongToLikedList = async (req, res) => {
     }
 };
 
-
-// Remove song from liked list
+// Remove song from the "Liked Songs" playlist
 export const removeSongFromLikedList = async (req, res) => {
     const { songId } = req.body;
 
@@ -186,7 +186,7 @@ export const removeSongFromLikedList = async (req, res) => {
         });
 
         if (!playlist) {
-            return res.status(404).json({ message: 'Liked Songs playlist not found' });
+            return res.status(404).json({ message: 'Liked Songs playlist not found for this user' });
         }
 
         const song = await Song.findByPk(songId);
