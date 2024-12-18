@@ -6,7 +6,7 @@ import { upload } from '../controllers/songController.js';
 const router = express.Router();
 
 // Upload a new song
-router.post('/', userAuthentication, upload.single('song'), uploadSong);
+router.post('/upload', userAuthentication, upload.single('song'), uploadSong);
 
 // Stream a song
 router.get('/stream/:songId', userAuthentication, streamSong);

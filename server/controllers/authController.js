@@ -71,8 +71,8 @@ export const login = async (req, res) =>{
         }
 
         const user = await User.findOne({where: {email}});
-        if (!user){
-            return res.status(401).json({message: "Invalid credentials"});
+        if (!user || user.deleted){
+            return res.status(401).json({message: "Invalid credentials or user deleted"});
         }
     
         const passwordMatch = await bcrypt.compare(password, user.password);

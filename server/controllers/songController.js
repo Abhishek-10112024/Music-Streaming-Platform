@@ -9,57 +9,68 @@ import { Op } from 'sequelize';
 // Multer Storage Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const uploadPath = 'uploads/songs';
-      
-      // Create the directory if it doesn't exist
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      
-      cb(null, uploadPath);
+        const uploadPath = 'uploads/songs';
+        
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        
+        cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); // Use timestamp to make filename unique
+        cb(null, Date.now() + path.extname(file.originalname));
     }
-  });
-  
+});
+
 export const upload = multer({ storage });
-  
-  // Refactor using async/await for better readability
-  export const uploadSong = async (req, res) => {
+
+// Upload song
+export const uploadSong = async (req, res) => {
     try {
-      const { title, artist, album, genre, duration } = req.body;
-      const file = req.file; // Multer attaches the file to `req.file`
-  
-      if (!file) {
-        return res.status(400).json({ message: 'No song file uploaded.' });
-      }
-  
-      // Check if the song already exists in the database
-      const existingSong = await Song.findOne({ where: { title, artist, album, deleted: false } });
-  
-      if (existingSong) {
-        return res.status(409).json({ message: 'This song already exists in the database.' });
-      }
-  
-      // Proceed with uploading the new song if not existing
-      const newSong = await Song.create({
-        title,
-        artist,
-        album,
-        genre,
-        duration,
-        mp3_file_path: file.path,
-        uploadedBy: req.user.id
-      });
-  
-      res.status(201).json({ message: 'Song uploaded successfully', song: newSong });
-  
+        const { title, artist, album, genre, duration } = req.body;
+        const file = req.file; 
+        
+        if (!file) {
+            return res.status(400).json({ message: 'No song file uploaded.' });
+        }
+
+        const existingSong = await Song.findOne({ where: { title, artist, album, deleted: false } });
+        
+        if (existingSong) {
+            return res.status(409).json({ message: 'This song already exists in the database.' });
+        }
+
+        const newSong = await Song.create({
+            title,
+            artist,
+            album,
+            genre,
+            duration,
+            mp3_file_path: file.path,
+            uploadedBy: req.user.id
+        });
+        
+        res.status(201).json({ message: 'Song uploaded successfully', song: newSong });
+        
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error uploading song', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Error uploading song', error: error.message });
     }
-  };
+};
+
+
+// Get list of all non-deleted, non-reported songs
+export const getAllSongs = async (req, res) => {
+    try {
+        const songs = await Song.findAll({
+            where: { deleted: false, isRestricted: false },
+        });
+        res.status(200).json({ songs });
+    } catch (err) {
+        res.status(500).json({ message: 'Error retrieving songs', error: err });
+    }
+};
+
 
 // Stream Song
 export const streamSong = async (req, res) => {
@@ -73,7 +84,6 @@ export const streamSong = async (req, res) => {
 
         const songFilePath = song.mp3_file_path;
 
-        // Check if file exists
         if (!fs.existsSync(songFilePath)) {
             return res.status(404).json({ message: 'File not found on server.' });
         }
@@ -101,7 +111,11 @@ export const reportSong = async (req, res) => {
             reason,
             songId: song.id,
             reportedBy: req.user.id,
+            status: 'pending',
         });
+
+        song.isRestricted = true;
+        await song.save();
 
         await song.addReport(report);
         res.status(201).json({ message: 'Song reported successfully' });
@@ -117,12 +131,21 @@ export const getReportedSongs = async (req, res) => {
     }
 
     try {
-        const reports = await Report.findAll({ include: Song });
+        const reports = await Report.findAll({
+            include: {
+                model: Song,
+                where: {
+                    '$Report.status$': ['accepted', 'pending'], 
+                },
+            },
+        });
+
         res.status(200).json({ reports });
     } catch (err) {
         res.status(500).json({ message: 'Error retrieving reports', error: err });
     }
 };
+
 
 // Accept or reject a report (admin only)
 export const resolveReport = async (req, res) => {
@@ -138,20 +161,26 @@ export const resolveReport = async (req, res) => {
     }
 
     try {
-        const report = await Report.findByPk(reportId);
+        const report = await Report.findByPk(reportId, { include: Song });
         if (!report) {
             return res.status(404).json({ message: 'Report not found' });
         }
 
         const updatedReport = await report.update({ status });
 
-        if (status === 'rejected') {
-            await report.song.removeReport(report); // Remove from reported songs if rejected
+        const song = report.Song;
+
+        if (status === 'accepted') {
         }
 
-        // if (status === 'accepted') {
-        //     await song.update({ deleted: true }); // Remove from reported songs if rejected
-        // }
+        if (status === 'rejected') {
+            song.isRestricted = false; 
+            await song.save();
+
+            await song.removeReport(report);
+
+            await report.destroy();
+        }
 
         res.status(200).json({ message: `Report ${status} successfully`, report: updatedReport });
     } catch (err) {
@@ -180,18 +209,6 @@ export const deleteSong = async (req, res) => {
     }
 };
 
-// Get list of all non-deleted, non-reported songs
-export const getAllSongs = async (req, res) => {
-    try {
-        const songs = await Song.findAll({
-            where: { deleted: false },
-            include: { model: Report, where: { status: 'pending' }, required: false },
-        });
-        res.status(200).json({ songs });
-    } catch (err) {
-        res.status(500).json({ message: 'Error retrieving songs', error: err });
-    }
-};
 
 // Get list of non-deleted, non-reported songs uploaded by logged-in user
 export const getUserSongs = async (req, res) => {
