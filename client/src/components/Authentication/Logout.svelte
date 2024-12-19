@@ -34,41 +34,22 @@
 </script>
   
   <div class="buttonContainer">
-    <button class="btn1" on:click={logout}>Log Out</button>
+    <button class="btn1" on:click={logout}>
+      <img src="https://cdn-icons-png.flaticon.com/512/7756/7756285.png" width="24" height="24" alt="Logout Icon" />
+    </button>
   </div>
   
   <style>
-    .buttonContainer {
-      display: flex;
-      justify-content: center; /* Center align the button */
-      margin-top: 20px; /* Space above the button */
-    }
-  
     .btn1 {
-      width: 120px; /* Increased width for better visibility */
-      padding: 10px 20px; /* Padding for a larger clickable area */
-      background: linear-gradient(45deg, #007bff, #0056b3); /* Gradient background */
-      color: white; /* White text color */
-      border: none; /* Remove default border */
-      border-radius: 8px; /* More rounded corners for a modern look */
-      font-size: 16px; /* Font size for the text */
-      cursor: pointer; /* Pointer cursor on hover */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-      transition: background 0.3s, transform 0.3s; /* Smooth transition for background and scale */
-      outline: none; /* Remove default focus outline */
+      width: 60px; 
+      color: white; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background 0.3s, transform 0.3s;
     }
   
     .btn1:hover {
-      background: linear-gradient(45deg, #0056b3, #003d7a); /* Darker gradient on hover */
       transform: scale(1.05); /* Slightly enlarge on hover */
-    }
-  
-    .btn1:active {
-      transform: scale(0.98); /* Slightly shrink on click */
-    }
-  
-    .btn1:focus {
-      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Focus outline for accessibility */
     }
   </style>
   

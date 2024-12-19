@@ -1,7 +1,5 @@
 import { users, songs, reports, userSongs, searchResults, playlists, playlistSongs, likes } from "./store";
 import { navigate } from 'svelte-routing';
-let errorMessage = '';
-let successMessage = '';
 
 
 // fetch the users (admin access)
