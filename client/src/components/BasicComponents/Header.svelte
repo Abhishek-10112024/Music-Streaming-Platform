@@ -1,13 +1,31 @@
 <script>
     import { navigate } from 'svelte-routing'; 
     import { jwtDecode } from "jwt-decode";
-  import Logout from '../Authentication/Logout.svelte';
+    import Logout from '../Authentication/Logout.svelte';
     let token = localStorage.getItem('token');
     let username = null;
     const decodedToken = jwtDecode(token);
     // @ts-ignore
     username = decodedToken.username;
-  </script>
+    </script>
+  
+  <header>
+    <div class="logo-container">
+      <img 
+        src="https://cdn-icons-png.flaticon.com/512/3820/3820321.png" 
+        alt="Logo" 
+        class="logo"
+      />
+      <span class="logo-text">SoulPlay</span>
+    </div>
+
+    <div class="nav-links">
+      <a href="#!" on:click={() => navigate('/my-playlists')}>My Playlists</a>
+      <a href="#!">Hello, {username}</a>
+      <Logout/>
+    </div>
+  </header>
+
   
   <style>
     header {
@@ -51,20 +69,4 @@
     }
   </style>
   
-  <header>
-    <div class="logo-container">
-      <img 
-        src="https://cdn-icons-png.flaticon.com/512/3820/3820321.png" 
-        alt="Logo" 
-        class="logo"
-      />
-      <span class="logo-text">SoulPlay</span>
-    </div>
-
-    <div class="nav-links">
-      <a href="#!" on:click={() => navigate('/my-playlists')}>My Playlists</a>
-      <a href="#!">Hello, {username}</a>
-      <Logout/>
-    </div>
-  </header>
   
