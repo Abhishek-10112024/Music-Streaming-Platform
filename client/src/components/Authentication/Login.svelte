@@ -19,7 +19,7 @@
           if (response.ok) {
               token = data.token;
               localStorage.setItem('token', token);
-              navigate('/logout')
+              navigate('/dashboard')
           } else {
               error = data.message;
           }

@@ -1,5 +1,6 @@
 <script>
     import { navigate } from 'svelte-routing';
+    import { onMount } from 'svelte';
   
     const logout = async () => {
       const token = localStorage.getItem('token');
@@ -31,6 +32,12 @@
             alert('An unexpected error occurred while logging out.');
         }
     };
+
+    onMount(() => {
+        const token = localStorage.getItem('token')
+        if (!token)
+        navigate ('/')
+    });
 </script>
   
   <div class="buttonContainer">
