@@ -1,5 +1,6 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
+    import { navigate } from 'svelte-routing';
     import Footer from './Footer.svelte';
     import Header from './Header.svelte';
     import { fetchSongs } from '../../exportFunction';
@@ -78,6 +79,10 @@
     };
   
     onMount(() => {
+      const token = localStorage.getItem('token')
+        if (!token)
+        navigate ('/');
+
       fetchSongs();
       audioPlayer.addEventListener('timeupdate', updateProgress); 
       audioPlayer.addEventListener('ended', playNextSong);

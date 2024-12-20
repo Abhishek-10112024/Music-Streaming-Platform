@@ -2,11 +2,19 @@
     import { navigate } from 'svelte-routing'; 
     import { jwtDecode } from "jwt-decode";
     import Logout from '../Authentication/Logout.svelte';
+    import { onMount } from 'svelte';
     let token = localStorage.getItem('token');
-    let username = null;
     const decodedToken = jwtDecode(token);
     // @ts-ignore
-    username = decodedToken.username;
+    let username = decodedToken.username;
+    // @ts-ignore
+    let role = decodedToken.role
+
+    onMount(() => {
+        const token = localStorage.getItem('token')
+        if (!token)
+        navigate ('/')
+    });
     </script>
   
   <header>
@@ -20,7 +28,13 @@
     </div>
 
     <div class="nav-links">
-      <a href="#!" on:click={() => navigate('/my-playlists')}>My Playlists</a>
+      <a href="#!" on:click={() => navigate('/playlist')}>My Playlists</a>
+      <a href="#!" on:click={() => navigate('/upload')}>Upload Song</a>
+      {#if role === 'admin'}
+      <a href="#!" on:click={() => navigate('/reportedsongs')}>Reported Songs</a>
+      <a href="#!" on:click={() => navigate('/users')}>User Management</a>
+      <a href="#!" on:click={() => navigate('/deletesong')}>Song Management</a>
+      {/if}
       <a href="#!">Hello, {username}</a>
       <Logout/>
     </div>
