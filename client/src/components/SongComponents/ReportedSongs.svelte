@@ -66,9 +66,7 @@
 <div class="resolve-form">
     <h2>Reported Songs</h2>
 
-    {#if $reports.length === 0}
-    <p class="no-reports">No reports available.</p>
-    {:else}
+    {#if $reports.length > 0}
     <div class="reports-list">
         {#each $reports as report}
             <div class="report-item">
@@ -84,6 +82,8 @@
             </div>
         {/each}
     </div>
+    {:else}
+        <p class="no-reports">No reports available.</p>
     {/if}
 
     {#if selectedReportId}
@@ -115,7 +115,7 @@
 <style>
   .resolve-form {
       padding: 30px;
-      background-color: #f8f9fa;
+      background: url(https://cdn-icons-png.flaticon.com/512/3820/3820321.png);
       border-radius: 12px;
       box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
       max-width: 1200px;

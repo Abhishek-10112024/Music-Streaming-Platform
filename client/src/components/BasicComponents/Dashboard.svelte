@@ -5,6 +5,23 @@
     import Header from './Header.svelte';
     import { fetchSongs } from '../../exportFunction';
     import { songs } from '../../store';
+    import ReportSong from '../SongComponents/ReportSong.svelte';
+
+
+    let selectedSongId = null; 
+    let isModalOpen = false; 
+  
+    // Open the modal and set the selected song ID
+    const openReportModal = (songId) => {
+        selectedSongId = songId;
+        isModalOpen = true;
+    };
+
+    // Close the modal
+    const closeModal = () => {
+        isModalOpen = false;
+        selectedSongId = null;
+    };
     
     let currentSongIndex = -1;
     let currentSongTitle = '';
@@ -77,6 +94,10 @@
     const updateProgress = () => {
         currentTime = audioPlayer.currentTime;
     };
+
+    const handleRowClick = (songId, index) => {
+        streamSong(songId, index);
+    };
   
     onMount(() => {
       const token = localStorage.getItem('token')
@@ -92,11 +113,11 @@
       audioPlayer.removeEventListener('timeupdate', updateProgress);
       audioPlayer.pause();
     });
-  </script>
+</script>
   
-  <Header />
+<Header />
   
-  <div class="dashboard-container">
+<div class="dashboard-container">
     <table class="song-table">
       <thead>
         <tr>
@@ -105,23 +126,33 @@
           <th>Album</th>
           <th>Genre</th>
           <th>Duration</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         {#each $songs as song (song.id)}
-          <tr class="song-item" on:click={() => streamSong(song.id, $songs.indexOf(song))}>
+          <tr class="song-item" on:click={() => handleRowClick(song.id, $songs.indexOf(song))}>
             <td>{song.title}</td>
             <td>{song.artist}</td>
             <td>{song.album}</td>
             <td>{song.genre}</td>
             <td>{formatDuration(song.duration)}</td>
+            <td>
+              <button class="report-button" on:click={(e) => { 
+                  e.stopPropagation(); // Prevent the row click from triggering streaming
+                  openReportModal(song.id); // Open the report modal
+              }}>Report</button>
+          </td>
           </tr>
         {/each}
       </tbody>
     </table>
-  </div>
+</div>
+{#if isModalOpen}
+    <ReportSong {selectedSongId} close={closeModal} />
+{/if}
   
-  <Footer
+<Footer
     bind:currentSongTitle
     bind:currentSongArtist
     bind:songDuration
@@ -130,9 +161,9 @@
     onTogglePlayPause={togglePlayPause}
     onPlayNextSong={playNextSong}
     onPlayPreviousSong={playPreviousSong}
-  />
+/>
   
-  <style>
+<style>
     .dashboard-container {
     padding: 10px;
     width: 100%;
@@ -167,6 +198,7 @@
       font-size: 16px;
       font-weight: bold;
       letter-spacing: 1px;
+      text-align: center;
     }
   
     .song-table tbody {
@@ -186,7 +218,7 @@
       padding: 12px 20px;
       font-size: 14px;
       color: #333;
-      text-align: left;
+      text-align: center;
     }
   
     .song-item {
@@ -196,6 +228,32 @@
     .song-item:hover {
       background-color: #e0e0e0;
     }
-  </style>
+    .report-button {
+      background-color: #ff6f61;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      text-align: center;
+  }
+
+  .report-button:hover {
+      background-color: #e24d42;
+      transform: translateY(-2px);
+  }
+
+  .report-button:focus {
+      outline: none;
+      box-shadow: 0 0 5px rgba(255, 111, 97, 0.8);
+  }
+
+  .report-button:active {
+      background-color: #d14c39;
+      transform: translateY(0);
+  }
+</style>
   
   

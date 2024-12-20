@@ -6,13 +6,6 @@ import { navigate } from 'svelte-routing';
 export const fetchUsers = async () => {
     try {
         const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-
-        if (!role || !token) {
-            console.error('Token or userRole is missing:');
-            return;
-        }
-
         const response = await fetch('http://localhost:5000/api/users', {
           method: 'GET',
           headers: {
@@ -64,12 +57,6 @@ export const fetchSongs = async () => {
 export const fetchReportedSongs = async () => {
     try {
         const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-
-        if (!role || !token) {
-            console.error('Token or userRole is missing:');
-            return;
-        }
         const response = await fetch('http://localhost:5000/api/songs/reports', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
