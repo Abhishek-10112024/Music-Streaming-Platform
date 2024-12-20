@@ -197,7 +197,10 @@ export const fetchLikedSongs = async () => {
             throw new Error('No token found');
         }
         const response = await fetch('http://localhost:5000/api/playlists/liked-songs', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
         });
         if (response.ok) {
             const data = await response.json();

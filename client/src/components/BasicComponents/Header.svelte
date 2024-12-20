@@ -29,6 +29,7 @@
 
     <div class="nav-links">
       <a href="#!" on:click={() => navigate('/playlist')}>My Playlists</a>
+      <a href="#!" on:click={() => navigate('/liked')}>Liked Songs</a>
       <a href="#!" on:click={() => navigate('/upload')}>Upload Song</a>
       <a href="#!" on:click={() => navigate('/mysongs')}>My Uploaded Songs</a>
       {#if role === 'admin'}

@@ -3,13 +3,19 @@
     import { navigate } from 'svelte-routing';
     import Footer from './Footer.svelte';
     import Header from './Header.svelte';
-    import { fetchSongs } from '../../exportFunction';
-    import { songs } from '../../store';
+    import { fetchLikedSongs, fetchSongs } from '../../exportFunction';
+    import { songs, likes } from '../../store';
     import ReportSong from '../SongComponents/ReportSong.svelte';
-
 
     let selectedSongId = null; 
     let isModalOpen = false; 
+    let currentSongIndex = -1;
+    let currentSongTitle = '';
+    let currentSongArtist = '';
+    let isPlaying = false;
+    let audioPlayer = new Audio();
+    let songDuration = 0;
+    let currentTime = 0;
   
     // Open the modal and set the selected song ID
     const openReportModal = (songId) => {
@@ -22,22 +28,14 @@
         isModalOpen = false;
         selectedSongId = null;
     };
-    
-    let currentSongIndex = -1;
-    let currentSongTitle = '';
-    let currentSongArtist = '';
-    let isPlaying = false;
-    let audioPlayer = new Audio();
-    let songDuration = 0;
-    let currentTime = 0;
   
     // Stream song function
     const streamSong = async (songId, index) => {
-      currentSongIndex = index;
-      const song = $songs[currentSongIndex];
-      currentSongTitle = song.title;
-      currentSongArtist = song.artist;
-      songDuration = song.duration;
+        currentSongIndex = index;
+        const song = $songs[currentSongIndex];
+        currentSongTitle = song.title;
+        currentSongArtist = song.artist;
+        songDuration = song.duration;
   
       // API to fetch and play the song
       try {
@@ -98,6 +96,57 @@
     const handleRowClick = (songId, index) => {
         streamSong(songId, index);
     };
+
+    // Function to toggle the like status of a song
+    const toggleLike = (songId) => {
+        if ($likes.includes(songId)) {
+            removeFromLiked(songId);
+        } else {
+            addToLiked(songId);
+        }
+    };
+
+    // Add a song to the liked list
+    async function addToLiked(songId) {
+        try {
+            const response = await fetch('http://localhost:5000/api/playlists/liked-songs/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify({ songId }),
+            });
+            if (response.ok) {
+                likes.update(currentLikes => [...currentLikes, songId]);
+            } else {
+                alert('Failed to add song');
+            }
+        } catch (err) {
+            alert('Error adding song');
+        }
+    }
+
+    // Remove a song from the liked list
+    async function removeFromLiked(songId) {
+        try {
+            const response = await fetch('http://localhost:5000/api/playlists/liked-songs/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify({ songId }),
+            });
+            if (response.ok) {
+                likes.update(currentLikes => currentLikes.filter(id => id !== songId));
+            } else {
+                alert('Failed to remove song');
+            }
+        } catch (err) {
+            alert('Error removing song');
+        }
+    }
   
     onMount(() => {
       const token = localStorage.getItem('token')
@@ -105,6 +154,8 @@
         navigate ('/');
 
       fetchSongs();
+      fetchLikedSongs();
+      console.log($likes);
       audioPlayer.addEventListener('timeupdate', updateProgress); 
       audioPlayer.addEventListener('ended', playNextSong);
     });
@@ -138,6 +189,18 @@
             <td>{song.genre}</td>
             <td>{formatDuration(song.duration)}</td>
             <td>
+              <button 
+                class="heart-icon" 
+                on:click={(e) => {
+                  e.stopPropagation();
+                  toggleLike(song.id); // Toggle the like status
+                }}>
+                {#if $likes.includes(song.id)}
+                  ❤️
+                {:else}
+                  🤍
+                {/if}
+              </button>
               <button class="report-button" on:click={(e) => { 
                   e.stopPropagation(); // Prevent the row click from triggering streaming
                   openReportModal(song.id); // Open the report modal
@@ -238,22 +301,27 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
       text-align: center;
-  }
+    }
+    .report-button:hover {
+        background-color: #e24d42;
+        transform: translateY(-2px);
+    }
 
-  .report-button:hover {
-      background-color: #e24d42;
-      transform: translateY(-2px);
-  }
+    .report-button:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 111, 97, 0.8);
+    }
 
-  .report-button:focus {
-      outline: none;
-      box-shadow: 0 0 5px rgba(255, 111, 97, 0.8);
-  }
-
-  .report-button:active {
-      background-color: #d14c39;
-      transform: translateY(0);
-  }
+    .report-button:active {
+        background-color: #d14c39;
+        transform: translateY(0);
+    }
+    .heart-icon {
+      cursor: pointer;
+      transition: color 0.3s ease;
+      border: none;
+      font-size: large;
+    }
 </style>
   
   
