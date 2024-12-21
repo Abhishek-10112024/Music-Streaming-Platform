@@ -8,7 +8,6 @@
   import ReportedSongs from './components/SongComponents/ReportedSongs.svelte';
   import SongManagement from './components/SongComponents/SongManagement.svelte';
   import MySongs from './components/SongComponents/MySongs.svelte';
-  import PlaylistsAndSongs from './components/PlaylistComponents/PlaylistsAndSongs.svelte';
   import Playlist from './components/PlaylistComponents/Playlist.svelte';
   import LikedSongs from './components/PlaylistComponents/LikedSongs.svelte';
   import Dashboard from './components/BasicComponents/Dashboard.svelte';
@@ -24,7 +23,6 @@
     <Route path="/reportedsongs" component={ReportedSongs} />
     <Route path="/deletesong" component={SongManagement} />
     <Route path="/mysongs" component={MySongs} />
-    <Route path="/playlistsongs" component={PlaylistsAndSongs} />
     <Route path="/playlist" component={Playlist} />
     <Route path="/liked" component={LikedSongs} />
     <Route path="/dashboard" component={Dashboard} />
