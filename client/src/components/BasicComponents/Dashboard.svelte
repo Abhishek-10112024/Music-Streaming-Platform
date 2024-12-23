@@ -205,84 +205,84 @@
   
 <Header />
   
-<div class="dashboard-container">
-    <table class="song-table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Artist</th>
-                <th>Album</th>
-                <th>Genre</th>
-                <th>Duration</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
+<div class="dashboard-wrapper">
+    <div class="dashboard-container">
+        <div class="song-grid">
             {#each $songs as song (song.id)}
-                <tr class="song-item" on:click={() => handleRowClick(song.id, $songs.indexOf(song))}>
-                    <td>{song.title}</td>
-                    <td>{song.artist}</td>
-                    <td>{song.album}</td>
-                    <td>{song.genre}</td>
-                    <td>{formatDuration(song.duration)}</td>
-                    <td>
-                      <button
-                          class="heart-icon"
-                          on:click={(e) => {
-                              e.stopPropagation();
-                              toggleLike(song.id);
-                          }}
-                          aria-label={$likes.includes(song.id) ? 'Unlike song' : 'Like song'}>
-                          {#if $likes.includes(song.id)}
-                              ❤️
-                          {:else}
-                              🤍
-                          {/if}
-                      </button>
-                      <button
-                          on:click={(e) => {
-                              e.stopPropagation();
-                              togglePlaylistsDropdown(song.id);
-                          }}
-                          aria-expanded={showPlaylists && selectedSongId === song.id}
-                          aria-label="Add song to playlist">
-                          📂
-                      </button>
-                      {#if showPlaylists && selectedSongId === song.id}
-                          <div class="playlist-dropdown" role="menu">
-                              {#each $playlists as playlist}
-                                  <button
-                                      class="playlist-item"
-                                      role="menuitem"
-                                      on:click={(e) => {
-                                          e.stopPropagation();
-                                          addSongToPlaylist(playlist.id);
-                                          showPlaylists = false;
-                                      }}>
-                                      {playlist.name}
-                                  </button>
-                              {/each}
-                          </div>
-                      {/if}
-                      <button
-                          class="report-button"
-                          on:click={(e) => {
-                              e.stopPropagation();
-                              openReportModal(song.id);
-                          }}
-                          aria-label="Report song">
-                          Report
-                      </button>
-                  </td>                                              
-                </tr>
+                <div 
+                    class="song-card" 
+                    role="button" 
+                    tabindex="0" 
+                    on:click={() => handleRowClick(song.id, $songs.indexOf(song))} 
+                    on:keydown={(e) => e.key === 'Enter' && handleRowClick(song.id, $songs.indexOf(song))}
+                >
+                    <div class="song-card-header">
+                        <h3>{song.title}</h3>
+                        <p>{song.artist}</p>
+                    </div>
+                    <div class="song-card-body">
+                        <p><strong>Album:</strong> {song.album}</p>
+                        <p><strong>Genre:</strong> {song.genre}</p>
+                        <p><strong>Duration:</strong> {formatDuration(song.duration)}</p>
+                    </div>
+                    <div class="song-card-actions">
+                        <button
+                            class="heart-icon"
+                            on:click={(e) => {
+                                e.stopPropagation();
+                                toggleLike(song.id);
+                            }}
+                            aria-label={$likes.includes(song.id) ? 'Unlike song' : 'Like song'}>
+                            {#if $likes.includes(song.id)}
+                                ❤️
+                            {:else}
+                                🤍
+                            {/if}
+                        </button>
+                        <button
+                            on:click={(e) => {
+                                e.stopPropagation();
+                                togglePlaylistsDropdown(song.id);
+                            }}
+                            aria-expanded={showPlaylists && selectedSongId === song.id}
+                            aria-label="Add song to playlist">
+                            📂
+                        </button>
+                        {#if showPlaylists && selectedSongId === song.id}
+                            <div class="playlist-dropdown" role="menu">
+                                {#each $playlists as playlist}
+                                    <button
+                                        class="playlist-item"
+                                        role="menuitem"
+                                        on:click={(e) => {
+                                            e.stopPropagation();
+                                            addSongToPlaylist(playlist.id);
+                                            showPlaylists = false;
+                                        }}>
+                                        {playlist.name}
+                                    </button>
+                                {/each}
+                            </div>
+                        {/if}
+                        <button
+                            class="report-button"
+                            on:click={(e) => {
+                                e.stopPropagation();
+                                openReportModal(song.id);
+                            }}
+                            aria-label="Report song">
+                            Report
+                        </button>
+                    </div>
+                </div>
             {/each}
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
 {#if isModalOpen}
     <ReportSong {selectedSongId} close={closeModal} />
 {/if}
-  
+
 <Footer
     {currentSongTitle}
     {currentSongArtist}
@@ -293,72 +293,123 @@
     onPlayNextSong={playNextSong}
     onPlayPreviousSong={playPreviousSong}
 />
-  
+
 <style>
-    .dashboard-container {
-    padding: 20px;
-    width: 100%;
-    min-height: calc(100vh - 120px);  /* Ensure it takes up full height minus header and footer */
-    margin: 0 auto;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(45deg, #ff8c00, #ff6347);
-    display: flex;
-    justify-content: center; 
-    align-items: flex-start; 
-    padding-top: 100px; /* Add padding-top to prevent overlap with header */
-    }
-
-    .song-table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: #fff;
-        border-radius: 8px;
+    .dashboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100vh; 
         overflow: hidden;
+        padding-bottom: 10%;
+    }
+
+    .dashboard-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        font-family: 'Arial', sans-serif;
+        background: linear-gradient(45deg, #ff8c00, #ff6347);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 100px;
     }
 
-    .song-table thead {
-        background-color: #333;
-        color: #fff;
+    .song-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        width: 100%;
     }
 
-    .song-table thead th {
-        padding: 14px 20px;
-        text-align: left;
-        font-size: 16px;
-        font-weight: bold;
-        letter-spacing: 1px;
-        text-align: center;
-    }
-
-    .song-table tbody {
-        background-color: #fafafa;
-    }
-
-    .song-table tbody tr {
-        border-bottom: 1px solid #ddd;
-    }
-
-    .song-table tbody tr:hover {
-        background-color: #f1f1f1;
+    .song-card {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .song-table tbody td {
-        padding: 14px 20px;
+    .song-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .song-card-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .song-card-header p {
+        margin: 5px 0 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .song-card-body {
+        margin-top: 10px;
         font-size: 14px;
         color: #333;
-        text-align: center;
     }
 
-    .song-item {
-        transition: background-color 0.3s ease;
+    .song-card-body p {
+        margin: 5px 0;
     }
-  
-    .song-item:hover {
-        background-color: #e0e0e0;
+
+    .song-card-actions {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .heart-icon {
+        cursor: pointer;
+        transition: color 0.3s ease;
+        border: none;
+        font-size: 20px;
+        background: none;
+    }
+
+    .heart-icon:hover {
+        color: #ff6347;
+    }
+
+    .playlist-dropdown {
+        background-color: #fff;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 200px;
+        padding: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        z-index: 9999;
+    }
+
+    .playlist-item {
+        padding: 8px 10px;
+        font-size: 14px;
+        color: #333;
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        transition: background-color 0.2s ease;
+    }
+
+    .playlist-item:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
     }
 
     .report-button {
@@ -386,44 +437,5 @@
     .report-button:active {
         background-color: #d14c39;
         transform: translateY(0);
-    }
-
-    .heart-icon {
-        cursor: pointer;
-        transition: color 0.3s ease;
-        border: none;
-        font-size: large;
-    }
-
-    .heart-icon:hover {
-        color: #ff6347;
-    }
-
-    .playlist-dropdown {
-        background-color: #fff;
-        position: fixed; /* Position it relative to the viewport */
-        top: calc(100px); /* Adjust to be 100px below the header (assuming header height is 100px) */
-        left: 0;
-        width: 10%;
-        padding: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 6px;
-        z-index: 9999; 
-    }
-
-    .playlist-item {
-        padding: 8px 10px;
-        font-size: 14px;
-        color: #333;
-        background-color: transparent;
-        border: none;
-        width: 100%;
-        text-align: left;
-        transition: background-color 0.2s ease;
-    }
-
-    .playlist-item:hover {
-        background-color: #f1f1f1;
-        cursor: pointer;
     }
 </style>
