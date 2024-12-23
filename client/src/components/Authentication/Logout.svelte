@@ -56,7 +56,7 @@
     }
   
     .btn1:hover {
-      transform: scale(1.05); /* Slightly enlarge on hover */
+      transform: scale(1.05);
     }
   </style>
   

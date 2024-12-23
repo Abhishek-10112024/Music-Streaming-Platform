@@ -12,6 +12,7 @@
 
   let audioPlayer = new Audio();
 
+  // Format duration (seconds to MM:SS)
   const formatDuration = (duration) => {
       const minutes = Math.floor(duration / 60);
       const seconds = Math.floor(duration % 60);
@@ -23,21 +24,22 @@
       onTogglePlayPause();  
   };
   
+  // play next song
   const playNextSong = () => {
       onPlayNextSong();  
   };
   
+  // play prevoius song
   const playPreviousSong = () => {
       onPlayPreviousSong();  
   };
 
   onMount(() => {
       const token = localStorage.getItem('token')
-      if (!token)
-      navigate ('/');
+      if (!token) navigate('/');
   });
 </script>
-  
+
 <footer>
   <div class="song-details">
     <div class="song-title">{currentSongTitle}</div>
@@ -89,24 +91,26 @@
 
   <audio id="audio-player" bind:this={audioPlayer}></audio>
 </footer>
-  
+
 <style>
   footer {
-      background-color: #212121;
+      background-color: #181818;
       color: #fff;
-      padding: 1rem 2rem;
+      padding: 1.5rem 2rem;
       position: fixed;
       bottom: 0;
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.5);
       z-index: 100;
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
+      transition: background-color 0.3s ease;
+      backdrop-filter: blur(10px); 
   }
-  
+
   .song-details {
       display: flex;
       flex-direction: column;
@@ -114,49 +118,58 @@
       align-items: flex-start;
       max-width: 250px;
       padding-right: 1rem;
+      overflow: hidden;
   }
 
   .song-title {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
       margin-bottom: 5px;
       color: #fff;
       letter-spacing: 0.5px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 200px; 
   }
 
   .song-artist {
-      font-size: 1rem;
-      color: #bdbdbd;
+      font-size: 1.1rem;
+      color: #bbb;
+      opacity: 0.7;
   }
 
   .progress-container {
       display: flex;
       align-items: center;
       flex-grow: 1;
-      margin: 0 1rem;
+      margin: 0 1.5rem;
+      position: relative;
+      min-width: 0; 
   }
 
   .progress-bar {
       width: 100%;
-      height: 5px;
-      background-color: #4e4e4e;
-      border-radius: 5px;
+      height: 6px;
+      background-color: #4a4a4a;
+      border-radius: 6px;
       position: relative;
       cursor: pointer;
   }
 
   .progress-bar-filled {
       height: 100%;
-      background-color: #ff6347;
+      background-color: #1db954; 
       width: 0%;
-      border-radius: 5px;
-      transition: width 0.2s ease;
+      border-radius: 6px;
+      transition: width 0.3s ease;
   }
 
   .time {
       font-size: 0.9rem;
       margin-left: 10px;
-      color: #bdbdbd;
+      color: #bbb;
+      opacity: 0.8;
   }
 
   .controls {
@@ -169,48 +182,47 @@
       background: none;
       border: none;
       color: #fff;
-      font-size: 1.8rem;
+      font-size: 2rem;
       margin: 0 1.5rem;
       cursor: pointer;
       transition: all 0.3s ease;
   }
 
   .control-btn:hover {
-      color: #ff6347;
-      transform: scale(1.1);
+      color: #1db954; 
+      transform: scale(1.2);
   }
 
   .toggle-btn {
       width: 70px;
       height: 70px;
       border-radius: 50%;
-      background-color: #ff6347;
+      background-color: #1db954; 
       display: flex;
       justify-content: center;
       align-items: center;
       color: #fff;
-      font-size: 2rem;
+      font-size: 2.5rem;
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(29, 185, 84, 0.5);
   }
 
   .toggle-btn:hover {
-      background-color: #e53e1a;
+      background-color: #1ed760;
       transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(29, 185, 84, 0.7);
   }
 
   .toggle-btn:focus,
   .control-btn:focus {
       outline: none;
-      box-shadow: 0 0 10px rgba(255, 99, 71, 0.6);
+      box-shadow: 0 0 10px rgba(29, 185, 84, 0.6);
   }
 
   .control-btn:focus,
   .toggle-btn:focus {
-      box-shadow: 0 0 5px 2px rgba(255, 99, 71, 0.8);
+      box-shadow: 0 0 5px 2px rgba(29, 185, 84, 0.8);
   }
-
 </style>
-  
-  

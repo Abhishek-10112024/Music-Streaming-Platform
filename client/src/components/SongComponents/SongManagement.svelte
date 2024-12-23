@@ -44,166 +44,167 @@
   </script>
 
 <div class="song-management">
-  <h1>Song Management</h1>
+    <h1>🎵 Song Management</h1>
+
+    {#if errorMessage}
+        <p class="error">{errorMessage}</p>
+    {/if}
+    {#if successMessage}
+        <p class="success">{successMessage}</p>
+    {/if}
+
+    <table class="song-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each $songs as song (song.id)}
+                <tr>
+                    <td>{song.id}</td>
+                    <td>{song.title}</td>
+                    <td>{song.artist}</td>
+                    <td>{song.album}</td>
+                    <td>
+                      <button class="delete-btn" on:click={() => deleteSong(song.id)}>🗑️ Delete</button>
+                    </td>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
   
-  <!-- Error and Success Message Display -->
-  {#if errorMessage}
-      <p class="error">{errorMessage}</p>
-  {/if}
-  {#if successMessage}
-      <p class="success">{successMessage}</p>
-  {/if}
-
-  <!-- song Table -->
-  <table class="song-table">
-      <thead>
-          <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Artist</th>
-              <th>Album</th>
-              <th>Action</th>
-          </tr>
-      </thead>
-      <tbody>
-          {#each $songs as song (song.id)}
-              <tr>
-                  <td>{song.id}</td>
-                  <td>{song.title}</td>
-                  <td>{song.artist}</td>
-                  <td>{song.album}</td>
-                  <td>
-                    <button class="delete-btn" on:click={() => deleteSong(song.id)}>Delete</button>
-                  </td>
-              </tr>
-          {/each}
-      </tbody>
-  </table>
-
-  <div class="button-container">
-      <button class="btn dashboard" on:click={navigateToDashboard}>Back to Admin Dashboard</button>
+    <div class="button-container">
+        <button class="btn dashboard" on:click={navigateToDashboard}>🏠 Back to Admin Dashboard</button>
+    </div>
   </div>
-</div>
-
-<style>
-  .song-management {
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-      max-width: 1100px;
-      margin: 30px auto;
-      background: url(https://cdn-icons-png.flaticon.com/512/3820/3820321.png);
+  
+  <style>
+    .song-management {
+      padding: 40px;
+      background: linear-gradient(135deg, #56ccf2, #2f80ed);
+      border-radius: 20px;
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
+      max-width: 1200px;
+      margin: 40px auto;
       color: #fff;
-  }
-
-  h1 {
       font-family: 'Roboto', sans-serif;
-      margin-bottom: 25px;
-      color: #333;
       text-align: center;
-      font-size: 26px;
-      font-weight: bold;
-  }
+    }
+  
+    h1 {
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 30px;
+      font-weight: 600;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+    }
 
-  .error, .success {
+    .error, .success {
       padding: 15px;
-      border-radius: 6px;
+      border-radius: 10px;
+      font-size: 16px;
       text-align: center;
-      font-size: 14px;
-      margin-bottom: 20px;
-  }
-
-  .error {
+      margin-top: 20px;
+      max-width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  
+    .error {
       background-color: #f8d7da;
       color: #721c24;
-  }
-
-  .success {
+    }
+  
+    .success {
       background-color: #d4edda;
       color: #155724;
-  }
+    }
 
-  .song-table {
+    .song-table {
       width: 100%;
       border-collapse: collapse;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
       margin-top: 30px;
-  }
-
-  .song-table thead {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+  
+    .song-table thead {
       background-color: #333;
       color: white;
-  }
-
-  .song-table th, .song-table td {
-      padding: 12px;
+    }
+  
+    .song-table th, .song-table td {
+      padding: 15px;
       text-align: center;
-      font-size: 15px;
-  }
-
-  .song-table th {
+      font-size: 16px;
+    }
+  
+    .song-table th {
       font-weight: bold;
       text-transform: uppercase;
-  }
-
-  .song-table tbody {
+    }
+  
+    .song-table tbody {
       background-color: #fff;
-  }
-
-  .song-table tbody tr {
-      border-bottom: 1px solid #eee;
-  }
-
-  .song-table tbody tr:last-child {
+    }
+  
+    .song-table tbody tr {
+      border-bottom: 1px solid #ddd;
+    }
+  
+    .song-table tbody tr:last-child {
       border-bottom: none;
-  }
-
-  .song-table tbody td {
+    }
+  
+    .song-table tbody td {
       color: #333;
-      font-size: 14px;
-  }
+    }
+  
+    .song-table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
 
-  .song-table tbody tr:hover {
-      background-color: #f1f1f1;
-  }
-
-  .delete-btn {
-      padding: 8px 15px;
+    .delete-btn {
+      padding: 10px 20px;
       background-color: #ff3b30;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      transition: background-color 0.3s ease, transform 0.3s;
-  }
-
-  .delete-btn:hover {
+      transition: background-color 0.3s, transform 0.3s;
+    }
+  
+    .delete-btn:hover {
       background-color: #e02f2f;
       transform: translateY(-2px);
-  }
+    }
 
-  .button-container {
+    .button-container {
       display: flex;
       justify-content: center;
-      margin-top: 30px;
-  }
+      margin-top: 35px;
+    }
 
-  .btn {
-      padding: 12px 25px;
+    .btn {
+      padding: 14px 30px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s ease, transform 0.3s;
-      margin: 0 15px;
       background-color: #007bff;
       color: white;
-  }
-
-  .btn:hover {
+      transition: background-color 0.3s, transform 0.3s;
+    }
+  
+    .btn:hover {
       background-color: #0056b3;
       transform: translateY(-2px);
-  }
-</style>
+    }
+  </style>
+  

@@ -75,7 +75,7 @@
   });
 </script>
 
-<h2>Upload a Song</h2>
+<h2>🎶 Upload Your Song</h2>
 
 <div class="form-container">
   {#if successMessage}
@@ -87,95 +87,89 @@
 
   <form on:submit={uploadSong}>
     <label for="title">Title:</label>
-    <input type="text" id="title" bind:value={title} required />
+    <input type="text" id="title" bind:value={title} placeholder="Enter the song title" required />
 
     <label for="artist">Artist:</label>
-    <input type="text" id="artist" bind:value={artist} required />
+    <input type="text" id="artist" bind:value={artist} placeholder="Enter the artist name" required />
 
     <label for="album">Album:</label>
-    <input type="text" id="album" bind:value={album} required />
+    <input type="text" id="album" bind:value={album} placeholder="Enter the album name" required />
 
     <label for="genre">Genre:</label>
-    <input type="text" id="genre" bind:value={genre} required />
+    <input type="text" id="genre" bind:value={genre} placeholder="Enter the genre" required />
 
     <label for="duration">Duration:</label>
-    <input type="text" id="duration" bind:value={duration} required />
+    <input type="text" id="duration" bind:value={duration} placeholder="Enter duration (e.g., 3:45)" required />
 
     <label for="song">Song File:</label>
     <input type="file" id="song" accept=".mp3" on:change={handleFileChange} required />
 
-    <button type="submit">Upload Song</button>
+    <button type="submit">🚀 Upload Song</button>
   </form>
 </div>
 
 <div class="button-container">
-      <button class="btn dashboard" on:click={navigateToDashboard}>Back to Dashboard</button>
+  <button class="btn dashboard" on:click={navigateToDashboard}>🏠 Back to Dashboard</button>
 </div>
 
 <style>
-  .form-container {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 30px;
-    background: url(https://cdn-icons-png.flaticon.com/512/3820/3820321.png);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
   h2 {
     text-align: center;
     color: #333;
-    font-size: 24px;
-    margin-bottom: -20px;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #ddd;
+  }
+
+  .form-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
 
   .form-container label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     color: #555;
   }
 
-  .form-container input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 10px;
-    color: #333;
-    box-sizing: border-box;
-  }
-
+  .form-container input[type="text"],
   .form-container input[type="file"] {
-    font-size: 13px;
     width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
+    padding: 12px 14px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
     border-radius: 8px;
+    font-size: 14px;
     color: #333;
     box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .form-container input[type="text"]:focus,
   .form-container input[type="file"]:focus {
-    border-color: #4CAF50;
-    outline: none;
-    box-shadow: 0 0 5px rgba(72, 212, 103, 0.4);
+    border-color: #4caf50;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.4);
   }
 
   .form-container button {
-    padding: 12px 20px;
-    background-color: #4CAF50;
-    color: white;
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #4caf50;
+    color: #ffffff;
     font-size: 16px;
+    font-weight: bold;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    width: 100%;
+    margin-top: 10px;
   }
 
   .form-container button:hover {
@@ -183,44 +177,57 @@
     transform: translateY(-2px);
   }
 
-  .button-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 30px;
+  .form-container button:focus {
+    outline: none;
+    box-shadow: 0 0 6px rgba(72, 212, 103, 0.4);
   }
 
-  .btn {
-      padding: 12px 25px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s ease, transform 0.3s;
-      margin: 0 15px;
-      background-color: #007bff;
-      color: white;
-  }
-
-  .btn:hover {
-      background-color: #0056b3;
-      transform: translateY(-2px);
+  .success,
+  .error {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
   }
 
   .success {
-    color: green;
+    color: #155724;
     background-color: #d4edda;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
+    border: 1px solid #c3e6cb;
   }
 
   .error {
-    color: red;
+    color: #721c24;
     background-color: #f8d7da;
-    padding: 12px;
+    border: 1px solid #f5c6cb;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .btn.dashboard {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
     border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .btn.dashboard:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  .btn.dashboard:focus {
+    outline: none;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
   }
 </style>

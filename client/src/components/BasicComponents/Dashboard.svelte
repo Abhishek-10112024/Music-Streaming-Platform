@@ -3,8 +3,8 @@
     import { navigate } from 'svelte-routing';
     import Footer from './Footer.svelte';
     import Header from './Header.svelte';
-    import { fetchLikedSongs, fetchSongs } from '../../exportFunction';
-    import { songs, likes } from '../../store';
+    import { fetchSongs, fetchUserPlaylists, fetchLikedSongs } from '../../exportFunction';
+    import { songs, likes, playlists } from '../../store';
     import ReportSong from '../SongComponents/ReportSong.svelte';
 
     let selectedSongId = null; 
@@ -16,6 +16,8 @@
     let audioPlayer = new Audio();
     let songDuration = 0;
     let currentTime = 0;
+    let showPlaylists = false;
+    let fetchedPlaylists = [];
   
     // Open the modal and set the selected song ID
     const openReportModal = (songId) => {
@@ -36,8 +38,7 @@
         currentSongTitle = song.title;
         currentSongArtist = song.artist;
         songDuration = song.duration;
-  
-      // API to fetch and play the song
+
       try {
         const response = await fetch(`http://localhost:5000/api/songs/stream/${songId}`, {
           method: 'GET',
@@ -67,6 +68,7 @@
       return `${minutes}:${String(seconds).padStart(2, '0')}`;
     };
   
+    //toggle play/pause function
     const togglePlayPause = () => {
       isPlaying = !isPlaying;
       if (isPlaying) {
@@ -75,13 +77,15 @@
         audioPlayer.pause();
       }
     };
-  
+
+    // play next song
     const playNextSong = () => {
       if (currentSongIndex + 1 < $songs.length) {
         streamSong($songs[currentSongIndex + 1].id, currentSongIndex + 1);
       }
     };
   
+    // play previous song
     const playPreviousSong = () => {
       if (currentSongIndex - 1 >= 0) {
         streamSong($songs[currentSongIndex - 1].id, currentSongIndex - 1);
@@ -93,6 +97,7 @@
         currentTime = audioPlayer.currentTime;
     };
 
+    // play song on click
     const handleRowClick = (songId, index) => {
         streamSong(songId, index);
     };
@@ -147,6 +152,39 @@
             alert('Error removing song');
         }
     }
+
+    // toggle playlist dropdown    
+    const togglePlaylistsDropdown = (songId) => {
+        selectedSongId = songId;
+        showPlaylists = !showPlaylists;
+        if (showPlaylists && fetchedPlaylists.length === 0) {
+            fetchUserPlaylists(); 
+        }
+    };
+
+    // Add a song to a playlist
+    const addSongToPlaylist = async (playlistId) => {
+        try {
+            const response = await fetch('http://localhost:5000/api/playlists/add-song', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ playlistId, songId: selectedSongId }),
+            });
+
+            if (response.ok) {
+                alert('Song added to playlist!');
+            } else {
+                alert('Failed to add song to playlist.');
+            }
+        } catch (err) {
+            console.error('Error adding song to playlist:', err);
+        } finally {
+            showPlaylists = false;
+        }
+    };
   
     onMount(() => {
       const token = localStorage.getItem('token')
@@ -155,7 +193,6 @@
 
       fetchSongs();
       fetchLikedSongs();
-      console.log($likes);
       audioPlayer.addEventListener('timeupdate', updateProgress); 
       audioPlayer.addEventListener('ended', playNextSong);
     });
@@ -170,45 +207,76 @@
   
 <div class="dashboard-container">
     <table class="song-table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Artist</th>
-          <th>Album</th>
-          <th>Genre</th>
-          <th>Duration</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each $songs as song (song.id)}
-          <tr class="song-item" on:click={() => handleRowClick(song.id, $songs.indexOf(song))}>
-            <td>{song.title}</td>
-            <td>{song.artist}</td>
-            <td>{song.album}</td>
-            <td>{song.genre}</td>
-            <td>{formatDuration(song.duration)}</td>
-            <td>
-              <button 
-                class="heart-icon" 
-                on:click={(e) => {
-                  e.stopPropagation();
-                  toggleLike(song.id); // Toggle the like status
-                }}>
-                {#if $likes.includes(song.id)}
-                  ❤️
-                {:else}
-                  🤍
-                {/if}
-              </button>
-              <button class="report-button" on:click={(e) => { 
-                  e.stopPropagation(); // Prevent the row click from triggering streaming
-                  openReportModal(song.id); // Open the report modal
-              }}>Report</button>
-          </td>
-          </tr>
-        {/each}
-      </tbody>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Genre</th>
+                <th>Duration</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each $songs as song (song.id)}
+                <tr class="song-item" on:click={() => handleRowClick(song.id, $songs.indexOf(song))}>
+                    <td>{song.title}</td>
+                    <td>{song.artist}</td>
+                    <td>{song.album}</td>
+                    <td>{song.genre}</td>
+                    <td>{formatDuration(song.duration)}</td>
+                    <td>
+                      <button
+                          class="heart-icon"
+                          on:click={(e) => {
+                              e.stopPropagation();
+                              toggleLike(song.id);
+                          }}
+                          aria-label={$likes.includes(song.id) ? 'Unlike song' : 'Like song'}>
+                          {#if $likes.includes(song.id)}
+                              ❤️
+                          {:else}
+                              🤍
+                          {/if}
+                      </button>
+                      <button
+                          on:click={(e) => {
+                              e.stopPropagation();
+                              togglePlaylistsDropdown(song.id);
+                          }}
+                          aria-expanded={showPlaylists && selectedSongId === song.id}
+                          aria-label="Add song to playlist">
+                          📂
+                      </button>
+                      {#if showPlaylists && selectedSongId === song.id}
+                          <div class="playlist-dropdown" role="menu">
+                              {#each $playlists as playlist}
+                                  <button
+                                      class="playlist-item"
+                                      role="menuitem"
+                                      on:click={(e) => {
+                                          e.stopPropagation();
+                                          addSongToPlaylist(playlist.id);
+                                          showPlaylists = false;
+                                      }}>
+                                      {playlist.name}
+                                  </button>
+                              {/each}
+                          </div>
+                      {/if}
+                      <button
+                          class="report-button"
+                          on:click={(e) => {
+                              e.stopPropagation();
+                              openReportModal(song.id);
+                          }}
+                          aria-label="Report song">
+                          Report
+                      </button>
+                  </td>                                              
+                </tr>
+            {/each}
+        </tbody>
     </table>
 </div>
 {#if isModalOpen}
@@ -216,11 +284,11 @@
 {/if}
   
 <Footer
-    bind:currentSongTitle
-    bind:currentSongArtist
-    bind:songDuration
-    bind:isPlaying
-    bind:currentTime
+    {currentSongTitle}
+    {currentSongArtist}
+    {isPlaying}
+    {songDuration}
+    {currentTime}
     onTogglePlayPause={togglePlayPause}
     onPlayNextSong={playNextSong}
     onPlayPreviousSong={playPreviousSong}
@@ -228,80 +296,83 @@
   
 <style>
     .dashboard-container {
-    padding: 10px;
+    padding: 20px;
     width: 100%;
-    min-height: calc(100vh - 120px);
+    min-height: calc(100vh - 120px);  /* Ensure it takes up full height minus header and footer */
     margin: 0 auto;
     border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    background: url(https://cdn-icons-png.flaticon.com/512/3820/3820321.png);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(45deg, #ff8c00, #ff6347);
     display: flex;
     justify-content: center; 
     align-items: flex-start; 
+    padding-top: 100px; /* Add padding-top to prevent overlap with header */
     }
-  
+
     .song-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      font-family: 'Arial', sans-serif;
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
     }
-  
+
     .song-table thead {
-      background-color: #1a1a1a;
-      color: #fff;
+        background-color: #333;
+        color: #fff;
     }
-  
+
     .song-table thead th {
-      padding: 12px 20px;
-      text-align: left;
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      text-align: center;
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-align: center;
     }
-  
+
     .song-table tbody {
-      background-color: #fafafa;
+        background-color: #fafafa;
     }
-  
+
     .song-table tbody tr {
-      border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
     }
-  
+
     .song-table tbody tr:hover {
-      background-color: #f1f1f1;
-      cursor: pointer;
+        background-color: #f1f1f1;
+        cursor: pointer;
     }
-  
+
     .song-table tbody td {
-      padding: 12px 20px;
-      font-size: 14px;
-      color: #333;
-      text-align: center;
+        padding: 14px 20px;
+        font-size: 14px;
+        color: #333;
+        text-align: center;
     }
-  
+
     .song-item {
-      transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease;
     }
   
     .song-item:hover {
-      background-color: #e0e0e0;
+        background-color: #e0e0e0;
     }
+
     .report-button {
-      background-color: #ff6f61;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      text-align: center;
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-align: center;
     }
+
     .report-button:hover {
         background-color: #e24d42;
         transform: translateY(-2px);
@@ -316,12 +387,43 @@
         background-color: #d14c39;
         transform: translateY(0);
     }
+
     .heart-icon {
-      cursor: pointer;
-      transition: color 0.3s ease;
-      border: none;
-      font-size: large;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        border: none;
+        font-size: large;
+    }
+
+    .heart-icon:hover {
+        color: #ff6347;
+    }
+
+    .playlist-dropdown {
+        background-color: #fff;
+        position: fixed; /* Position it relative to the viewport */
+        top: calc(100px); /* Adjust to be 100px below the header (assuming header height is 100px) */
+        left: 0;
+        width: 10%;
+        padding: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        z-index: 9999; 
+    }
+
+    .playlist-item {
+        padding: 8px 10px;
+        font-size: 14px;
+        color: #333;
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        transition: background-color 0.2s ease;
+    }
+
+    .playlist-item:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
     }
 </style>
-  
-  
