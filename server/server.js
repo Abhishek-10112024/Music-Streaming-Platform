@@ -23,9 +23,6 @@ Song.belongsTo(User, { foreignKey: 'uploadedBy' });
 Playlist.belongsToMany(Song, { through: 'PlaylistSong', foreignKey: 'playlistId' });
 Song.belongsToMany(Playlist, { through: 'PlaylistSong', foreignKey: 'songId' });
 
-User.belongsToMany(Song, { through: 'Like', foreignKey: 'userId' });
-Song.belongsToMany(User, { through: 'Like', foreignKey: 'songId' });
-
 Report.belongsTo(Song, { foreignKey: 'songId' });
 Song.hasMany(Report, { foreignKey: 'songId' });
 
