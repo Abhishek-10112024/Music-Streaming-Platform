@@ -300,7 +300,7 @@
         flex-direction: column;
         height: 100vh; 
         overflow: hidden;
-        padding-bottom: 10%;
+        padding-bottom: 8%;
     }
 
     .dashboard-container {

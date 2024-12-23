@@ -194,8 +194,8 @@
   }
 
   .toggle-btn {
-      width: 70px;
-      height: 70px;
+      width:55px;
+      height: 55px;
       border-radius: 50%;
       background-color: #1db954; 
       display: flex;
