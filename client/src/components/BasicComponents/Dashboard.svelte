@@ -311,7 +311,7 @@
         margin: 0 auto;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        background: linear-gradient(45deg, #ff8c00, #ff6347);
+        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(88,9,121,1) 35%, rgba(0,212,255,1) 100%);
         display: flex;
         justify-content: center;
         align-items: flex-start;
