@@ -96,7 +96,14 @@
     <input type="text" id="album" bind:value={album} placeholder="Enter the album name" required />
 
     <label for="genre">Genre:</label>
-    <input type="text" id="genre" bind:value={genre} placeholder="Enter the genre" required />
+      <select id="genre" bind:value={genre} required>
+          <option value="" disabled selected>Select a genre</option>
+          <option value="pop">Pop</option>
+          <option value="rock">Rock</option>
+          <option value="jazz">Jazz</option>
+          <option value="classical">Classical</option>
+          <option value="hip-hop">Hip-Hop</option>
+      </select>
 
     <label for="duration">Duration:</label>
     <input type="text" id="duration" bind:value={duration} placeholder="Enter duration (e.g., 3:45)" required />
@@ -229,5 +236,12 @@
   .btn.dashboard:focus {
     outline: none;
     box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+  }
+  select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
   }
 </style>
