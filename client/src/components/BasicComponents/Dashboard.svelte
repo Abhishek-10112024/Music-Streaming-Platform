@@ -124,6 +124,11 @@
         streamSong(songId, index);
     };
 
+    // Seek to a specific time in the song
+  const seekTo = (time) => {
+    audioPlayer.currentTime = time;
+  };
+
     // Function to toggle the like status of a song
     const toggleLike = (songId) => {
         if ($likes.includes(songId)) {
@@ -330,6 +335,7 @@
     onTogglePlayPause={togglePlayPause}
     onPlayNextSong={playNextSong}
     onPlayPreviousSong={playPreviousSong}
+    onSeek={seekTo}
 />
 
 <style>

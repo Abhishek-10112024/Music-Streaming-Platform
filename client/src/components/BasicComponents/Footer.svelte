@@ -9,6 +9,7 @@
   export let isPlaying = false;
   export let songDuration = 0;
   export let currentTime = 0;
+  export let onSeek = (e) => {};
 
   let audioPlayer = new Audio();
 
@@ -34,6 +35,16 @@
       onPlayPreviousSong();  
   };
 
+  // Handle progress bar click for seeking
+  const handleProgressClick = (e) => {
+    const progressBar = e.target;
+    const clickPosition = e.offsetX;
+    const progressWidth = progressBar.offsetWidth;
+    const seekTo = (clickPosition / progressWidth) * songDuration;
+    onSeek(seekTo); 
+  };
+
+
   onMount(() => {
       const token = localStorage.getItem('token')
       if (!token) navigate('/');
@@ -49,6 +60,7 @@
   <div class="progress-container">
     <div
       class="progress-bar"
+      on:click={handleProgressClick} on:keydown={handleProgressClick}
       role="slider"
       aria-valuenow="{(currentTime / songDuration) * 100}"
       aria-valuemin="0"
