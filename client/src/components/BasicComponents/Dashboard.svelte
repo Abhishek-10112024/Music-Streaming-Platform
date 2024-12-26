@@ -344,7 +344,7 @@
         flex-direction: column;
         height: 100vh; 
         overflow: hidden;
-        padding-bottom: 8%;
+        padding-bottom: 60%;
     }
 
     .dashboard-container {
@@ -357,9 +357,10 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(88,9,121,1) 35%, rgba(0,212,255,1) 100%);
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: flex-start;
-        padding-top: 100px;
+        padding-top: 650px;
     }
 
     .song-grid {
