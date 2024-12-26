@@ -361,6 +361,7 @@
         justify-content: center;
         align-items: flex-start;
         padding-top: 650px;
+        padding-bottom: 80px;
     }
 
     .song-grid {
