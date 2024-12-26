@@ -235,10 +235,10 @@ export const searchSongs = async (req, res) => {
             where: {
                 deleted: false,
                 [Op.or]: [
-                    { title: { [Op.like]: `%${query}%` } },
-                    { artist: { [Op.like]: `%${query}%` } },
-                    { album: { [Op.like]: `%${query}%` } },
-                    { genre: { [Op.like]: `%${query}%` } },
+                    { title: { [Op.iLike]: `%${query}%` } },
+                    { artist: { [Op.iLike]: `%${query}%` } },
+                    { album: { [Op.iLike]: `%${query}%` } },
+                    { genre: { [Op.iLike]: `%${query}%` } },
                 ],
             },
         });

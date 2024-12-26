@@ -3,8 +3,8 @@
     import { navigate } from 'svelte-routing';
     import Footer from './Footer.svelte';
     import Header from './Header.svelte';
-    import { fetchSongs, fetchUserPlaylists, fetchLikedSongs } from '../../exportFunction';
-    import { songs, likes, playlists } from '../../store';
+    import { fetchSongs, fetchUserPlaylists, fetchLikedSongs, searchSongs } from '../../exportFunction';
+    import { songs, likes, playlists,searchResults } from '../../store';
     import ReportSong from '../SongComponents/ReportSong.svelte';
 
     let selectedSongId = null; 
@@ -18,6 +18,28 @@
     let currentTime = 0;
     let showPlaylists = false;
     let fetchedPlaylists = [];
+    let searchQuery = '';
+    let displaySongs = $songs;
+
+    // Reactive statement to update displaySongs dynamically
+    $: displaySongs = $searchResults.length > 0 ? $searchResults : $songs;
+
+     // Handle search submission
+     const handleSearch = async () => {
+        if (searchQuery.trim()) {
+            await searchSongs(searchQuery); 
+            displaySongs = $searchResults; 
+        } else {
+            displaySongs = $songs; 
+        }
+    };
+
+    // Clear search and reset to default songs
+    const clearSearch = () => {
+        searchQuery = '';
+        searchResults.set([]); 
+        displaySongs = $songs; 
+    };
   
     // Open the modal and set the selected song ID
     const openReportModal = (songId) => {
@@ -207,15 +229,28 @@
   
 <div class="dashboard-wrapper">
     <div class="dashboard-container">
+        <div class="search-container">
+            <input 
+        type="text" 
+        bind:value={searchQuery} 
+        placeholder="Search for songs..." 
+    />
+    <button on:click={handleSearch}>Search</button>
+    <button on:click={clearSearch}>Clear</button>
+        </div>
         <div class="song-grid">
-            {#each $songs as song (song.id)}
+            {#if displaySongs.length > 0}
+                {#each displaySongs as song (song.id)}
                 <div 
                     class="song-card" 
                     role="button" 
                     tabindex="0" 
-                    on:click={() => handleRowClick(song.id, $songs.indexOf(song))} 
-                    on:keydown={(e) => e.key === 'Enter' && handleRowClick(song.id, $songs.indexOf(song))}
-                >
+                    on:click={() => handleRowClick(song.id, displaySongs.indexOf(song))} 
+                    on:keydown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            handleRowClick(song.id, displaySongs.indexOf(song));
+                        }
+                    }}>
                     <div class="song-card-header">
                         <h3>{song.title}</h3>
                         <p>{song.artist}</p>
@@ -275,7 +310,10 @@
                         </button>
                     </div>
                 </div>
-            {/each}
+                {/each}
+                {:else}
+                    <p>No songs found matching your search query.</p>
+                {/if}
         </div>
     </div>
 </div>
@@ -437,5 +475,17 @@
     .report-button:active {
         background-color: #d14c39;
         transform: translateY(0);
+    }
+    .search-container {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    .search-container input {
+        flex: 1;
+        padding: 8px;
+        margin-right: 10px;
+    }
+    .search-container button {
+        padding: 8px;
     }
 </style>
