@@ -37,10 +37,13 @@
 
   // Handle progress bar click for seeking
   const handleProgressClick = (e) => {
-    const progressBar = e.target;
-    const clickPosition = e.offsetX;
-    const progressWidth = progressBar.offsetWidth;
+    const progressBar = e.target; //e.target refers to the element that was clicked (in this case, the progress bar). This is the element where the event is dispatched
+    const clickPosition = e.offsetX; //e.offsetX gives the horizontal position of the mouse click relative to the left edge of the progress bar, This tells us where on the progress bar the user clicked
+    const progressWidth = progressBar.offsetWidth; //progressBar.offsetWidth provides the total width of the progress bar element & It's used to determine the entire clickable range of the progress bar
     const seekTo = (clickPosition / progressWidth) * songDuration;
+    // This calculates the position in the song (in seconds) that corresponds to the clicked position on the progress bar
+    // clickPosition / progressWidth calculates the percentage of the progress bar that was clicked
+    // * songDuration then scales that percentage by the total song duration to get the exact time to seek to
     onSeek(seekTo); 
   };
 

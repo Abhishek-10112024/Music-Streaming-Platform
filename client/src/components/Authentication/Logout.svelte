@@ -21,7 +21,6 @@
 
             if (response.ok) {
                 localStorage.removeItem('token');
-                localStorage.removeItem('userRole');
                 navigate('/', { replace: true });
             } else {
                 const { message } = await response.json();

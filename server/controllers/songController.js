@@ -11,8 +11,8 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = 'uploads/songs';
         
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
+        if (!fs.existsSync(uploadPath)) { //Returns true if the path exists, false otherwise.
+            fs.mkdirSync(uploadPath, { recursive: true }); //Synchronously creates a directory. 
         }
         
         cb(null, uploadPath);
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
     }
 });
 
-export const upload = multer({ storage });
+export const upload = multer({ storage }); //Returns a Multer instance that provides several methods for generating middleware that process files uploaded in multipart/form-data format.
 
 // Upload song
 export const uploadSong = async (req, res) => {
@@ -88,9 +88,9 @@ export const streamSong = async (req, res) => {
             return res.status(404).json({ message: 'File not found on server.' });
         }
 
-        res.setHeader('Content-Type', 'audio/mpeg');
-        const stream = fs.createReadStream(songFilePath);
-        stream.pipe(res);
+        res.setHeader('Content-Type', 'audio/mpeg'); //This sets the Content-Type header for the HTTP response to 'audio/mpeg'.
+        const stream = fs.createReadStream(songFilePath); //The readable stream allows you to send the contents of the file to the client in chunks, rather than loading the entire file into memory.
+        stream.pipe(res); //pipe() method sends the data from the file stream to the response, effectively sending the MP3 file to the client.
     } catch (err) {
         res.status(500).json({ message: 'Error streaming song', error: err });
     }
@@ -132,10 +132,10 @@ export const getReportedSongs = async (req, res) => {
 
     try {
         const reports = await Report.findAll({
-            include: {
+            include: { //include: This tells Sequelize to include associated models.
                 model: Song,
                 where: {
-                    '$Report.status$': ['accepted', 'pending'], 
+                    '$Report.status$': ['accepted', 'pending'], //$Report.status$ notation refers to Sequelize’s aliasing or dot notation used to reference fields from the associated model (Report in this case). It's essentially saying, "filter the Song results based on the status of the Report"
                 },
             },
         });

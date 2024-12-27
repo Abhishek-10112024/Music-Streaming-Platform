@@ -8,14 +8,14 @@
 
   const handleLogin = async () => {
       try {
-          const response = await fetch('http://localhost:5000/api/auth/login', {
+          const response = await fetch('http://localhost:5000/api/auth/login', { // fetch: native JS API for making HTTP requests
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password }),
-              credentials: 'include'
+              headers: { 'Content-Type': 'application/json' }, // specifies the JSON data
+              body: JSON.stringify({ email, password }), // converts text into JSON string for request payload
+              credentials: 'include' // ensures token is sent for authentication
           });
 
-          const data = await response.json();
+          const data = await response.json(); // it ensures to wait for promise to return, and then converts response from JSON to JS object
           if (response.ok) {
               token = data.token;
               localStorage.setItem('token', token);
@@ -24,7 +24,7 @@
               error = data.message;
           }
       } catch (error) {
-          console.error('Login error:', error);
+          alert(error);
           error = 'Login failed';
       }
   };

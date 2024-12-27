@@ -26,7 +26,7 @@
     }
 
     // Create FormData object and append form data
-    const formData = new FormData();
+    const formData = new FormData(); //Provides a way to easily construct a set of key/value pairs representing form fields and their values, which can then be easily sent using the XMLHttpRequest.send() method
     formData.append('title', title);
     formData.append('artist', artist);
     formData.append('album', album);

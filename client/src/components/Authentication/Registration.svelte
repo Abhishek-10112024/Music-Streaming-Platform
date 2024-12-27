@@ -15,7 +15,7 @@
                   headers: {
                       'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ username, email, password })
+                  body: JSON.stringify({ username, email, password }) //// converts text into JSON string for request payload
               });
   
               const data = await response.json();

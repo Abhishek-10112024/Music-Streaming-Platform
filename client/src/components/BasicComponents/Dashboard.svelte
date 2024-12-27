@@ -13,7 +13,7 @@
     let currentSongTitle = '';
     let currentSongArtist = '';
     let isPlaying = false;
-    let audioPlayer = new Audio();
+    let audioPlayer = new Audio(); //This creates a new instance of the Audio object, which is a built-in JavaScript class representing an HTML5 <audio> element
     let songDuration = 0;
     let currentTime = 0;
     let showPlaylists = false;
@@ -22,11 +22,11 @@
     let displaySongs = $songs;
 
     // Reactive statement to update displaySongs dynamically
-    $: displaySongs = $searchResults.length > 0 ? $searchResults : $songs;
+    $: displaySongs = $searchResults.length > 0 ? $searchResults : $songs; //true: $searchResults to displaySongs & false: $songs to displaySongs
 
      // Handle search submission
      const handleSearch = async () => {
-        if (searchQuery.trim()) {
+        if (searchQuery.trim()) { // Removes the leading and trailing white space and line terminator characters from a string
             await searchSongs(searchQuery); 
             displaySongs = $searchResults; 
         } else {
@@ -55,8 +55,8 @@
   
     // Stream song function
     const streamSong = async (songId, index) => {
-        currentSongIndex = index;
-        const song = $songs[currentSongIndex];
+        currentSongIndex = index; //Sets the index of the current song in the playlist.
+        const song = $songs[currentSongIndex]; //Retrieves the song object from the $songs array based on the current index
         currentSongTitle = song.title;
         currentSongArtist = song.artist;
         songDuration = song.duration;
@@ -70,11 +70,11 @@
         });
   
         if (response.ok) {
-          const blob = await response.blob();
-          audioPlayer.src = URL.createObjectURL(blob);
-          audioPlayer.load();
-          audioPlayer.play().catch((error) => console.error('Error playing song:', error));
-          isPlaying = true;
+          const blob = await response.blob(); //The server returns the song file as a blob (a binary large object).
+          audioPlayer.src = URL.createObjectURL(blob); //The blob is converted into a URL that can be used as the source for the audio player (audioPlayer is an <audio> HTML element).
+          audioPlayer.load(); //This reloads the audio element to use the new song source
+          audioPlayer.play().catch((error) => console.error('Error playing song:', error)); //audioPlayer.play();: Starts playing the song.
+          isPlaying = true; //Marks the song as playing
         } else {
           console.error('Error streaming song');
         }
@@ -85,38 +85,38 @@
   
     // Format duration (seconds to MM:SS)
     const formatDuration = (duration) => {
-      const minutes = Math.floor(duration / 60);
+      const minutes = Math.floor(duration / 60); //floor: Returns the greatest integer less than or equal to its numeric argument
       const seconds = Math.floor(duration % 60);
-      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+      return `${minutes}:${String(seconds).padStart(2, '0')}`; //Converts the seconds value into a string and pads it with leading zeros to ensure it is always two digits (e.g., 9 becomes 09)
     };
   
     //toggle play/pause function
     const togglePlayPause = () => {
       isPlaying = !isPlaying;
       if (isPlaying) {
-        audioPlayer.play();
+        audioPlayer.play(); //Loads and starts playback of a media resource
       } else {
-        audioPlayer.pause();
+        audioPlayer.pause(); //Pauses the current playback and sets paused to TRUE
       }
     };
 
     // play next song
     const playNextSong = () => {
-      if (currentSongIndex + 1 < $songs.length) {
-        streamSong($songs[currentSongIndex + 1].id, currentSongIndex + 1);
+      if (currentSongIndex + 1 < $songs.length) { //Ensures that the current song is not the last song in the playlist
+        streamSong($songs[currentSongIndex + 1].id, currentSongIndex + 1); //ID and Index of next song
       }
     };
   
     // play previous song
     const playPreviousSong = () => {
-      if (currentSongIndex - 1 >= 0) {
+      if (currentSongIndex - 1 >= 0) { //Ensures that the current song is not the first song in the playlist
         streamSong($songs[currentSongIndex - 1].id, currentSongIndex - 1);
       }
     };
 
     // Update currentTime as the song plays
     const updateProgress = () => {
-        currentTime = audioPlayer.currentTime;
+        currentTime = audioPlayer.currentTime; // audioPlayer.currentTime: Gets or sets the current playback position, in seconds
     };
 
     // play song on click
@@ -125,9 +125,9 @@
     };
 
     // Seek to a specific time in the song
-  const seekTo = (time) => {
-    audioPlayer.currentTime = time;
-  };
+    const seekTo = (time) => {
+        audioPlayer.currentTime = time; //moves the playback to the specified position
+    };
 
     // Function to toggle the like status of a song
     const toggleLike = (songId) => {
@@ -150,7 +150,7 @@
                 body: JSON.stringify({ songId }),
             });
             if (response.ok) {
-                likes.update(currentLikes => [...currentLikes, songId]);
+                likes.update(currentLikes => [...currentLikes, songId]); //Takes the current value of likes (likely an array) as input (currentLikes) & Returns a new array that includes all the existing likes and appends the songId
             } else {
                 alert('Failed to add song');
             }
@@ -171,7 +171,7 @@
                 body: JSON.stringify({ songId }),
             });
             if (response.ok) {
-                likes.update(currentLikes => currentLikes.filter(id => id !== songId));
+                likes.update(currentLikes => currentLikes.filter(id => id !== songId)); //currentLikes: Represents the current array of liked song IDs & filter: Creates a new array by keeping only the IDs that do not match the songId
             } else {
                 alert('Failed to remove song');
             }
@@ -218,13 +218,13 @@
 
       fetchSongs();
       fetchLikedSongs();
-      audioPlayer.addEventListener('timeupdate', updateProgress); 
-      audioPlayer.addEventListener('ended', playNextSong);
+      audioPlayer.addEventListener('timeupdate', updateProgress); // timeupdate listener ensures real-time updates to the UI
+      audioPlayer.addEventListener('ended', playNextSong); // ended listener automates transitions to the next song
     });
 
     onDestroy(() => {
-      audioPlayer.removeEventListener('timeupdate', updateProgress);
-      audioPlayer.pause();
+      audioPlayer.removeEventListener('timeupdate', updateProgress); //The function passed to removeEventListener must exactly match the one added with addEventListener & Removes the previously attached timeupdate event listener from the audioPlayer object & If the listener is no longer needed, removing it avoids unnecessary memory usage
+      audioPlayer.pause(); ////Pauses the current playback and sets paused to TRUE
     });
 </script>
   
