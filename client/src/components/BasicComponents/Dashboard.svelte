@@ -208,8 +208,6 @@
             }
         } catch (err) {
             console.error('Error adding song to playlist:', err);
-        } finally {
-            showPlaylists = false;
         }
     };
   
